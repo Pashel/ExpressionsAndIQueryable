@@ -19,17 +19,44 @@ namespace Sample03
 			return resultString.ToString();
 		}
 
+	    private void VisitSubNodes(Expression first, Expression secod, string before = "", string after = "")
+	    {
+            Visit(first);
+
+            resultString.Append("(");
+            resultString.Append(before);
+
+            Visit(secod);
+
+            resultString.Append(after);
+            resultString.Append(")");
+        }
+
 		protected override Expression VisitMethodCall(MethodCallExpression node)
 		{
-			if (node.Method.DeclaringType == typeof(Queryable)
-				&& node.Method.Name == "Where")
-			{
-				var predicate = node.Arguments[1];
-				Visit(predicate);
+		    Expression predicate;
+            switch (node.Method.Name)
+            {
+                case "Where":
+                    if (node.Method.DeclaringType == typeof(Queryable))
+                    {
+                        predicate = node.Arguments[1];
+                        Visit(predicate);
+                        return node;
+                    }
+                    break;
+                case "StartsWith":
+                    VisitSubNodes(node.Object, node.Arguments[0], after: "*");
+                    return node;
+                case "EndsWith":
+                    VisitSubNodes(node.Object, node.Arguments[0], before: "*");
+                    return node;
+                case "Contains":
+                    VisitSubNodes(node.Object, node.Arguments[0], "*", "*");
+                    return node;
+            }
 
-				return node;
-			}
-			return base.VisitMethodCall(node);
+            return base.VisitMethodCall(node);
 		}
 
 		protected override Expression VisitBinary(BinaryExpression node)
@@ -54,11 +81,8 @@ namespace Sample03
 			        else
                         throw new NotSupportedException(string.Format("One operand shold be property or field amother constant", node.NodeType));
 
-                    Visit(visitFirst);
-					resultString.Append("(");
-					Visit(visitSecond);
-					resultString.Append(")");
-					break;
+			        VisitSubNodes(visitFirst, visitSecond);
+                    break;
 
 				default:
 					throw new NotSupportedException(string.Format("Operation {0} is not supported", node.NodeType));
