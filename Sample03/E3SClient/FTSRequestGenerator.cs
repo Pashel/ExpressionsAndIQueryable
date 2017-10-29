@@ -54,20 +54,6 @@ namespace Sample03.E3SClient
 			return uri;
 		}
 
-	    //private string GenerateQuery(List<string> queryList)
-	    //{
-	    //    if (queryList.Count == 0)
-	    //    {
-	    //        return "{\"query\":\"*\"}";
-	    //    }
-
-	    //    string result = "";
-	    //    foreach (var query in queryList)
-	    //    {
-	    //        result += 
-	    //    }
-	    //}
-
 		private string GetMetaTypeName(Type type)
 		{
 			var attributes = type.GetCustomAttributes(typeof(E3SMetaTypeAttribute), false);
