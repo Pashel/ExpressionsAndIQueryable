@@ -9,14 +9,13 @@ namespace Sample03
 {
 	public class ExpressionToFTSRequestTranslator : ExpressionVisitor
 	{
-		StringBuilder resultString;
+        List<string> queryList = new List<string>();
+        StringBuilder resultString = new StringBuilder();
 
-		public string Translate(Expression exp)
+		public List<string> Translate(Expression exp)
 		{
-			resultString = new StringBuilder();
 			Visit(exp);
-
-			return resultString.ToString();
+			return queryList;
 		}
 
 	    private void VisitSubNodes(Expression first, Expression secod, string before = "", string after = "")
@@ -30,7 +29,11 @@ namespace Sample03
 
             resultString.Append(after);
             resultString.Append(")");
-        }
+
+            // add formed query to collection
+            queryList.Add(resultString.ToString());
+	        resultString.Clear();
+	    }
 
 		protected override Expression VisitMethodCall(MethodCallExpression node)
 		{
@@ -38,19 +41,33 @@ namespace Sample03
             switch (node.Method.Name)
             {
                 case "Where":
-                    if (node.Method.DeclaringType == typeof(Queryable))
+                    if (node.Method.DeclaringType != typeof(Queryable))
+                        break;
+
+                    predicate = node.Arguments[0];
+                    if (predicate.NodeType == ExpressionType.Call)
                     {
-                        predicate = node.Arguments[1];
+                        // if left expression is not constant visit it (for expressions combining)
                         Visit(predicate);
-                        return node;
                     }
-                    break;
+                    predicate = node.Arguments[1];
+                    Visit(predicate);
+                    return node;
+
+                case "Select":
+                    if (node.Method.DeclaringType != typeof(Queryable))
+                        break;
+                    // example of not supported operation
+                    throw new NotSupportedException(string.Format("Operation Select is not supported", node.NodeType));
+
                 case "StartsWith":
                     VisitSubNodes(node.Object, node.Arguments[0], after: "*");
                     return node;
+
                 case "EndsWith":
-                    VisitSubNodes(node.Object, node.Arguments[0], before: "*");
+                    VisitSubNodes(node.Object, node.Arguments[0], "*");
                     return node;
+
                 case "Contains":
                     VisitSubNodes(node.Object, node.Arguments[0], "*", "*");
                     return node;

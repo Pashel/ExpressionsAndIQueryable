@@ -21,26 +21,26 @@ namespace Sample03.E3SClient
 			BaseAddress = baseAddress;
 		}
 
-		public Uri GenerateRequestUrl<T>(string query = "*", int start = 0, int limit = 10)
+		public Uri GenerateRequestUrl<T>(List<string> queryList, int start = 0, int limit = 10)
 		{
-			return GenerateRequestUrl(typeof(T), query, start, limit);
+			return GenerateRequestUrl(typeof(T), queryList, start, limit);
 		}
 
-		public Uri GenerateRequestUrl(Type type, string query = "*", int start = 0, int limit = 10)
+		public Uri GenerateRequestUrl(Type type, List<string> queryList, int start = 0, int limit = 10)
 		{
 			string metaTypeName = GetMetaTypeName(type);
 
 			var ftsQueryRequest = new FTSQueryRequest
 			{
-				Statements = new List<Statement>
-				{
-					new Statement {
-						Query = query
-					}
-				},
+				Statements = new List<Statement>() {new Statement {Query = "*"}},
 				Start = start,
 				Limit = limit
 			};
+
+		    foreach (var query in queryList)
+		    {
+                ftsQueryRequest.Statements.Add(new Statement { Query = query });
+            }
 
 			var ftsQueryRequestString = JsonConvert.SerializeObject(ftsQueryRequest);
 
@@ -53,6 +53,20 @@ namespace Sample03.E3SClient
 
 			return uri;
 		}
+
+	    //private string GenerateQuery(List<string> queryList)
+	    //{
+	    //    if (queryList.Count == 0)
+	    //    {
+	    //        return "{\"query\":\"*\"}";
+	    //    }
+
+	    //    string result = "";
+	    //    foreach (var query in queryList)
+	    //    {
+	    //        result += 
+	    //    }
+	    //}
 
 		private string GetMetaTypeName(Type type)
 		{
