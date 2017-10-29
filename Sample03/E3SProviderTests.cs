@@ -40,7 +40,7 @@ namespace Sample03
 		{
 			var employees = new E3SEntitySet<EmployeeEntity>(ConfigurationManager.AppSettings["user"], ConfigurationManager.AppSettings["password"]);
 
-			foreach (var emp in employees.Where(e => e.workstation == "EPRUIZHW0249"))
+			foreach (var emp in employees.Where(e => "EPRUIZHW0249" == e.workstation))
 			{
 				Console.WriteLine("{0} {1}", emp.nativename, emp.startworkdate);
 			}

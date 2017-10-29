@@ -74,9 +74,6 @@ namespace Sample03.E3SClient
                 Convert.ToBase64String(encoding.GetBytes(string.Format("{0}:{1}", UserName, Password))));
             client.DefaultRequestHeaders.Authorization = authHeader;
 
-            //client.DefaultRequestHeaders.Add("Authorization", "Basic " 
-            //    + Convert.ToBase64String(encoding.GetBytes(string.Format("{0}:{1}", UserName, Password))));
-
             return client;
 		}
 	}
